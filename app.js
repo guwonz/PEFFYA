@@ -767,14 +767,40 @@ function renderPost() {
 
 async function submitData() {
   const payload = JSON.parse(JSON.stringify(state.surveyData));
+
   console.log("FINAL STUDY DATA", payload);
 
-  if (STUDY_CONFIG.developmentMode || !STUDY_CONFIG.submissionEndpoint) return { ok: true, development: true };
-  const response = await fetch(STUDY_CONFIG.submissionEndpoint, {
-    method: "POST", mode: "cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload)
-  });
-  if (!response.ok) throw new Error(`Submission failed with status ${response.status}`);
-  return { ok: true };
+  if (
+    STUDY_CONFIG.developmentMode ||
+    !STUDY_CONFIG.submissionEndpoint
+  ) {
+    return {
+      ok: true,
+      development: true
+    };
+  }
+
+  const response = await fetch(
+    STUDY_CONFIG.submissionEndpoint,
+    {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Submission failed with status ${response.status}`
+    );
+  }
+
+  return {
+    ok: true
+  };
 }
 
 function renderDebrief() {
