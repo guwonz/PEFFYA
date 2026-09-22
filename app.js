@@ -25,9 +25,8 @@ let state = {
     postOrder: [],
     responses: [],
     startedAt: new Date().toISOString(),
-    completedAt: null
-  },
-  raffleNumber: ""
+    completedAt: null,
+    gcashNumber: ""
 };
 
 const SCREEN_ORDER = [
@@ -864,28 +863,39 @@ function renderDebrief() {
 function renderRaffle() {
   screen.innerHTML = `<h2>Token of Appreciation</h2>
     <p>Thank you for your participation! As a token of our appreciation, we are holding a raffle where three (3) lucky participants will win ₱300 each via GCash.</p>
-    <p>If you would like to join, please write your mobile number below. Your number will only be used to contact you if you win, and it will remain completely separate from your study responses.</p>
-    <div class="question"><label class="question-label" for="raffleNumber">If you wish to participate in the raffle, please write down your number.</label>
-      <input id="raffleNumber" type="tel" autocomplete="tel" value="${escapeHtml(state.raffleNumber)}"></div>
+    <p>If you would like to join, please write your mobile number below. Your number will only be used to contact you if you win the raffle and will not be used for research purposes.</p>
+    <div class="question">
+      <label class="question-label" for="gcashNumber">
+        If you wish to participate in the raffle, please write down your number.
+      </label>
+      <input id="gcashNumber" type="tel" autocomplete="tel" value="${escapeHtml(state.surveyData.gcashNumber || "")}">
+    </div>
     <div id="raffle-status" class="small muted"></div>
     ${actions({ nextLabel: "Submit" })}`;
+
   bindActions(async () => {
-    state.raffleNumber = document.getElementById("raffleNumber").value.trim();
-    if (!STUDY_CONFIG.developmentMode && STUDY_CONFIG.raffleEndpoint && state.raffleNumber) {
-      try {
-        await fetch(STUDY_CONFIG.raffleEndpoint, {
-          method: "POST", mode: "cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ raffleNumber: state.raffleNumber, submittedAt: new Date().toISOString() })
-        });
-      } catch (e) {
-        console.error(e);
-        document.getElementById("raffle-status").textContent = "There was a problem sending the raffle entry. Please contact the researchers.";
-        return;
-      }
+    state.surveyData.gcashNumber =
+      document.getElementById("gcashNumber").value.trim();
+
+    try {
+      await submitData();
+    } catch (e) {
+      console.error(e);
+      document.getElementById("raffle-status").textContent =
+        "There was a problem submitting your responses. Please contact the researchers.";
+      return;
     }
-    console.log("RAFFLE ENTRY (SEPARATE FROM STUDY DATA)", { raffleNumber: state.raffleNumber });
+
+    console.log("FINAL STUDY DATA SUBMITTED", state.surveyData);
+
     clearProgress();
-    screen.innerHTML = `<div class="center"><h2>Thank you!</h2><p>Your participation is complete.</p></div>`;
+
+    screen.innerHTML = `
+      <div class="center">
+        <h2>Thank you!</h2>
+        <p>Your participation is complete.</p>
+      </div>`;
+
     progressBar.style.width = "100%";
     progressPercent.textContent = "100%";
   });
