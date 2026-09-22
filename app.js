@@ -804,84 +804,133 @@ async function submitData() {
 function renderDebrief() {
   screen.innerHTML = `<h2>VI. Debriefing</h2>
     <div class="notice">
-      <p class="small" style="white-space: pre-wrap;">${escapeHtml(DEBRIEF_TEXT).trim().replace("National Center for Mental Health", "<strong>National Center for Mental Health</strong>").replace("In Touch Community Services", "<strong>In Touch Community Services</strong>")}
-</p>
+      <p class="small" style="white-space: pre-wrap;">${escapeHtml(DEBRIEF_TEXT).trim()
+        .replace("National Center for Mental Health", "<strong>National Center for Mental Health</strong>")
+        .replace("In Touch Community Services", "<strong>In Touch Community Services</strong>")
+        .replace("ask for you NOT to share this", "ask for you <strong>NOT</strong> to share this")}
+      </p>
     </div>
 
-    <p id="submit-status" class="small muted">
-      Preparing your responses for submission…
+    <p class="small muted">
+      Please continue to the final step to complete your submission.
     </p>
 
-    <div id="debrief-action" class="hidden"></div>`;
+    <div id="debrief-action">
+      <style>
+        .raffle-btn {
+          background-color: #1f2630;
+          color: white;
+          padding: 12px 20px;
+          border: none;
+          border-radius: 9px;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
 
-  submitData().then(result => {
-    document.getElementById("submit-status").textContent = result.development
-      ? "Development mode: study responses were logged to the browser console and were not uploaded."
-      : "Your study responses have been submitted successfully.";
+        .raffle-btn:hover {
+          background-color: #6e84a3;
+        }
 
-    document.getElementById("debrief-action").innerHTML = `
-  <style>
-    .raffle-btn {
-      background-color: #1f2630;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    .raffle-btn:hover {
-      background-color: #6e84a3;
-    }
-    .raffle-btn:active {
-      background-color: #6e84a3;
-    }
-  </style>
-  
-  <button type="button" id="continue-to-raffle" class="raffle-btn">
-    Continue to Token of Appreciation
-  </button>
-`;
+        .raffle-btn:active {
+          background-color: #6e84a3;
+        }
+      </style>
 
-    document.getElementById("debrief-action").classList.remove("hidden");
+      <button type="button" id="continue-to-raffle" class="raffle-btn">
+        Continue to Token of Appreciation
+      </button>
+    </div>`;
 
-    document.getElementById("continue-to-raffle").addEventListener("click", () => {
-      setScreen("raffle");
-    });
-
-  }).catch(error => {
-    console.error(error);
-
-    document.getElementById("submit-status").innerHTML =
-      `<span class="error">
-        We could not submit your responses. Please contact the researcher at dennize_lachica@dlsu.edu.ph.
-      </span>`;
+  document.getElementById("continue-to-raffle").addEventListener("click", () => {
+    setScreen("raffle");
   });
 }
 
 function renderRaffle() {
   screen.innerHTML = `<h2>Token of Appreciation</h2>
-    <p>Thank you for your participation! As a token of our appreciation, we are holding a raffle where three (3) lucky participants will win ₱300 each via GCash.</p>
-    <p>If you would like to join, please write your mobile number below. Your number will only be used to contact you if you win the raffle and will not be used for research purposes.</p>
+
+    <p>
+      Thank you for your participation! As a token of our appreciation,
+      we are holding a raffle where three (3) lucky participants will win
+      ₱300 each via GCash.
+    </p>
+
+    <p>
+      If you would like to join, please write your mobile number below.
+      Your number will only be used to contact you if you win the raffle
+      and will not be used for research purposes.
+    </p>
+
     <div class="question">
       <label class="question-label" for="gcashNumber">
         If you wish to participate in the raffle, please write down your number.
       </label>
-      <input id="gcashNumber" type="tel" autocomplete="tel" value="${escapeHtml(state.surveyData.gcashNumber || "")}">
+
+      <input
+        id="gcashNumber"
+        type="tel"
+        autocomplete="tel"
+        value="${escapeHtml(state.surveyData.gcashNumber || "")}"
+      >
     </div>
-    <div id="raffle-status" class="small muted"></div>
-    ${actions({ nextLabel: "Submit" })}`;
+
+    <div class="notice">
+  <p class="small">
+    <strong>The raffle is completely optional.</strong> If you do not wish to participate,
+    you may leave the GCash number field blank. However, please click
+    <strong>"Submit"</strong> below to complete your participation and ensure that your
+    study responses are recorded.
+  </p>
+</div>
+
+<div id="raffle-status" class="small muted"></div>
+
+${actions({ nextLabel: "Submit" })}`;
 
   bindActions(async () => {
+
+    const submitButton = document.querySelector(".actions button:not(.back)");
+
+    // Prevent accidental double-clicks.
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+    }
+
+    // Save GCash number before submitting the complete study data.
     state.surveyData.gcashNumber =
       document.getElementById("gcashNumber").value.trim();
 
+    // Tell the participant that their submission is being processed.
+    document.getElementById("raffle-status").textContent =
+      "Preparing your responses for submission…";
+
     try {
+
       await submitData();
-    } catch (e) {
-      console.error(e);
+
+      // Submission was successful.
       document.getElementById("raffle-status").textContent =
-        "There was a problem submitting your responses. Please contact the researchers.";
+        "Your study responses have been submitted successfully.";
+
+    } catch (e) {
+
+      console.error(e);
+
+      // Allow them to try again if the submission failed.
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+      }
+
+      document.getElementById("raffle-status").innerHTML =
+        `<span class="error">
+          We could not submit your responses. Please contact the lead researcher at
+          <a href="mailto:dennize_lachica@dlsu.edu.ph">
+            dennize_lachica@dlsu.edu.ph
+          </a>.
+        </span>`;
+
       return;
     }
 
