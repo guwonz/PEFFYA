@@ -27,6 +27,7 @@ let state = {
     startedAt: new Date().toISOString(),
     completedAt: null,
     gcashNumber: ""
+  }  
 };
 
 const SCREEN_ORDER = [
