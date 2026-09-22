@@ -579,9 +579,9 @@ function renderFlanker() {
         The Eriksen Flanker Test requires you to complete a task wherein a row of Five (5) arrows are projected and shown onto your screen. You are then asked to choose the same direction that the middle or center arrow was pointing towards by clicking or tapping the options on the bottom left and right corners of your screen.
       </p>
       
-      <button type="button" id="launch-task-btn" class="btn-primary launch-btn">
+      <a href="${escapeHtml(assessmentUrl)}" target="_blank" rel="noopener noreferrer" id="launch-task-btn" class="btn-primary launch-btn" style="display: inline-block; text-decoration: none; text-align: center; border-radius: 8px; box-sizing: border-box;">
         Open the Eriksen Flanker Test ↗
-      </button>
+      </a>
 
       <div id="task-started-msg" class="notice small hidden" style="margin-top: 15px; text-align: left;">
         <strong>Task in progress:</strong> Complete the test in the opened window, then return here to enter your scores below.
@@ -607,7 +607,6 @@ function renderFlanker() {
     ${actions({nextLabel: "Continue"})}`;
 
   document.getElementById("launch-task-btn")?.addEventListener("click", () => {
-    window.open(assessmentUrl, "CogniFitTask", "width=1024,height=768,scrollbars=yes,resizable=yes");
     document.getElementById("task-started-msg")?.classList.remove("hidden");
   });
 
@@ -626,7 +625,6 @@ function renderFlanker() {
     setScreen("participant");
   });
 }
-
 function renderParticipant() {
   screen.innerHTML = `<h2>IV. Demographic Profile</h2>
     <div class="question"><label class="question-label required" for="participantCode">Participant Code (Please input the first three letters of street where you reside and the last 3 digits of your contact number)</label>

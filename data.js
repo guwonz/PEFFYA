@@ -4,7 +4,7 @@
 const STUDY_CONFIG = {
   title: "Political Engagement on Social Media of Filipino Young Adults",
 
-  assessmentUrl: "...",
+  assessmentUrl: "https://www.cognifit.com/aplicaciones/html5/public/assessment/ASSESSMENT~@~ERIKSEN_FLANKER?testButtonUrl=https://www.cognifit.com%2Fbattery-of-tests%2Feriksen-flanker-task%3Freg%3Dtrue",
 
   submissionEndpoint: "https://script.google.com/macros/s/AKfycbzMsMPVmpww1K9jLEKvEmiE3I19lOj0fB-yBLj0FUQgG41_Dpq22D8OAP3irv7y9B-v/exec",
 
